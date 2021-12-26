@@ -10,7 +10,7 @@ app.use(bodyparser.urlencoded({ extended: true }))
 app.use(express.static("public"));
 
 
-mongoose.connect("mongodb://localhost:27017/todolistDB", { useNewUrlParser: true });
+mongoose.connect("mongodb+srv://disha92200:abacusyoyo92@cluster0.w7pi8.mongodb.net/todolistDB?retryWrites=true&w=majority", { useNewUrlParser: true });
 
 const itemsSchema = {
     name: String
@@ -72,8 +72,10 @@ app.get("/:customListName",(req,res)=>{
                     name:customListName,
                     items:[item1,item2,item3]
                 })
-                list.save();
-                res.redirect("/"+customListName)
+                list.save((err)=>{
+                    res.redirect("/"+customListName)
+                });
+                
                 
             }
             else{
@@ -99,14 +101,18 @@ app.post("/", function (req, res) {
         name:item
     })
     if(title==="Today"){
-        newItem.save()
-        res.redirect("/");
+        newItem.save((err)=>{
+            res.redirect("/");
+        })
+        
     }
     else{
         List.findOne({name:title},(err,result)=>{
            result.items.push(newItem)
-           result.save();
-           res.redirect("/"+title)
+           result.save((err)=>{
+            res.redirect("/"+title)
+           });
+           
         })
     }
     console.log("inserted successfully")
@@ -126,8 +132,9 @@ app.post("/delete",(req,res)=>{
         else{
             console.log(err)
         }
+        res.redirect("/")
     })
-    res.redirect("/")
+    
    }
    else{
        List.findOneAndUpdate({name:listTitle},{$pull:{items:{_id:id}}},(err,listItem)=>{
@@ -146,6 +153,6 @@ app.post("/delete",(req,res)=>{
 
 
 
-app.listen(3000, function () {
+app.listen(process.env.PORT || 3000, function () {
     console.log("done")
 });
